@@ -1,0 +1,111 @@
+This Python code:
+
+Creates a DataFrame with product details (ID, name, stock, weekly sales, restock threshold).
+Calculates predicted stock for the next 4 weeks based on weekly sales.
+Assigns restock status: Labels products needing restock if predicted stock falls below the threshold.
+Visualizes the data: Displays a horizontal bar chart comparing current stock to restock thresholds, highlighting products needing restocking.
+Displays a table of products with their current stock, predicted stock, and restock status.
+The result is a visualization and analysis of inventory needs, helping with decision-making for restocking.
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Data
+data = {
+    "product_id": [
+        101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
+        111, 112, 113, 114, 115, 116, 117, 118, 119, 120,
+        121, 122, 123, 124, 125, 126, 127, 128, 129, 130,
+        131, 132, 133, 134, 135, 136, 137, 138, 139, 140,
+        141, 142, 143, 144, 145, 146, 147, 148, 149, 150
+    ],
+    "product_name": [
+        'Laptop', 'Mouse', 'Keyboard', 'Monitor', 'Headphones',
+        'Webcam', 'Speaker', 'USB Drive', 'External HDD', 'SSD',
+        'Printer', 'Scanner', 'Router', 'Switch', 'Projector',
+        'Smartwatch', 'Tablet', 'Smartphone', 'Charger', 'Power Bank',
+        'Keyboard Case', 'Phone Case', 'Screen Guard', 'Camera', 'Tripod',
+        'Lens', 'Flash', 'Drone', 'Microphone', 'Lighting Kit',
+        'HDMI Cable', 'Ethernet Cable', 'Power Cord', 'Adapter', 'Surge Protector',
+        'Memory Card', 'Bluetooth Dongle', 'Game Console', 'Game Controller', 'VR Headset',
+        'Smart TV', 'Streaming Stick', 'Network Extender', 'Mesh Router', '3D Printer',
+        'Filament', 'Vacuum Robot', 'Air Purifier', 'Water Purifier', 'Coffee Maker'
+    ],
+    "current_stock": [
+        50, 150, 200, 80, 120, 110, 250, 400, 60, 180,
+        50, 70, 90, 130, 40, 300, 200, 500, 100, 80,
+        140, 240, 350, 60, 90, 50, 30, 40, 100, 70,
+        250, 300, 200, 150, 180, 400, 100, 70, 90, 60,
+        30, 100, 70, 250, 300, 200, 150, 180, 400, 100
+    ],
+    "sales_per_week": [
+        30, 50, 40, 20, 60, 35, 70, 120, 10, 60,
+        15, 20, 25, 40, 10, 100, 60, 150, 40, 30,
+        50, 90, 100, 20, 25, 15, 10, 5, 20, 15,
+        80, 90, 50, 40, 50, 120, 30, 20, 25, 15,
+        5, 20, 15, 80, 90, 50, 40, 50, 120, 30
+    ],
+    "restock_threshold": [
+        20, 50, 50, 30, 30, 50, 80, 150, 20, 80,
+        25, 30, 35, 60, 20, 120, 80, 180, 60, 50,
+        70, 100, 120, 30, 40, 20, 15, 10, 30, 20,
+        100, 120, 70, 60, 70, 150, 40, 30, 40, 20,
+        10, 30, 20, 100, 120, 70, 60, 70, 150, 40
+    ]
+}
+
+# Create DataFrame
+df = pd.DataFrame(data)
+
+# Calculate predicted stock after 4 weeks
+df['predicted_stock_4wks'] = df['current_stock'] - (df['sales_per_week'] * 4)
+
+# Check restock status
+df['restock_status'] = df.apply(
+    lambda x: "Restock Needed" if x['predicted_stock_4wks'] <= x['restock_threshold'] else "Stock Sufficient",
+    axis=1
+)
+
+# Identify products needing restock
+df['needs_restock'] = df['current_stock'] < df['restock_threshold']
+
+# Plot: Current Stock vs. Restock Threshold
+fig, ax = plt.subplots(figsize=(18, 24))  # Increase figure size for 150 data points
+
+# Horizontal bar chart for current stock
+bars = ax.barh(df['product_name'], df['current_stock'], color='skyblue', label='Current Stock')
+
+# Line for restock threshold
+ax.scatter(df['current_stock'], df['product_name'], color='red', label='Restock Threshold', marker='o')
+
+# Highlight products that need restocking
+for i, bar in enumerate(bars):
+    if df.iloc[i]['current_stock'] < df.iloc[i]['restock_threshold']:
+        bar.set_color('orange')
+
+# Add data labels for the bars
+for bar in bars:
+    xval = bar.get_width()
+    ax.text(xval + 2, bar.get_y() + bar.get_height() / 2, int(xval), va='center', fontsize=9)
+
+# Add title and labels
+ax.set_title('Inventory: Stock vs Restock Threshold', fontsize=18)
+ax.set_xlabel('Quantity', fontsize=14)
+ax.set_ylabel('Products', fontsize=14)
+
+# Rotate the product names on y-axis for better readability
+plt.yticks(rotation=0)
+
+# Add legend
+ax.legend()
+
+# Add grid for better readability
+ax.grid(axis='x', linestyle='--', alpha=0.7)
+
+# Tight layout for better spacing
+plt.tight_layout()
+
+# Show the graph
+plt.show()
+
+# Display results
+print(df[['product_name', 'current_stock', 'predicted_stock_4wks', 'restock_status']])
