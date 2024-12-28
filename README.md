@@ -1,2 +1,164 @@
 # project
-ADVANCE EXPENSE TRACKER MANAGER
+#ADVANCE EXPENSE TRACKER MANAGER
+# Expense Tracker Application with Visualizations
+# This notebook allows users to track their daily expenses, view summaries, gain insights, and save or load data. 
+# It includes graphical visualizations to show spending trends over time and by category.
+
+### Features:
+# - Add expenses by date and category.
+# - View summaries by category or date.
+# - Visualize spending trends with charts.
+# - Save and load expense records for persistence.
+
+### How to Use:
+# 1. Run each code cell sequentially.
+# 2. Interact with the program through the menu provided at the end.
+# 3. Your data will be saved automatically when you exit.
+
+# Install required libraries
+!pip install matplotlib
+
+# Import necessary libraries
+import matplotlib.pyplot as plt
+
+## Step 1: Initialize Data Storage
+# This cell initializes an empty list to store expense records. Each expense will be stored as a dictionary with keys for:
+# - Date
+# - Category
+# - Amount
+expenses = []
+print("Expense tracker initialized.")
+
+def add_expense():
+    """Function to add an expense"""
+    date = input("Enter date (YYYY-MM-DD): ")
+    category = input("Enter category (e.g., Food, Travel, Shopping): ")
+    amount = float(input("Enter amount: "))
+
+    # Append the expense as a dictionary to the list
+    expenses.append({"date": date, "category": category, "amount": amount})
+    print(f"Expense added: {category} - ${amount} on {date}")
+
+def view_summary():
+    """Function to view the summary of expenses by category or date"""
+    print("\nView Summary:")
+    print("1. Total by Category")
+    print("2. Total by Date")
+    choice = input("Enter your choice (1-2): ")
+
+    if choice == "1":
+        # Calculate total expenses by category
+        category_totals = {}
+        for expense in expenses:
+            category_totals[expense["category"]] = category_totals.get(expense["category"], 0) + expense["amount"]
+
+        print("\nExpenses by Category:")
+        for category, total in category_totals.items():
+            print(f"{category}: ${total:.2f}")
+
+    elif choice == "2":
+        # Calculate total expenses by date
+        date_totals = {}
+        for expense in expenses:
+            date_totals[expense["date"]] = date_totals.get(expense["date"], 0) + expense["amount"]
+
+        print("\nExpenses by Date:")
+        for date, total in date_totals.items():
+            print(f"{date}: ${total:.2f}")
+
+    else:
+        print("Invalid choice. Try again.")
+
+def save_data():
+    """Function to save data to a file"""
+    with open("EXPENSES1.txt", "w") as file:
+        for expense in expenses:
+            file.write(f"{expense['date']}|{expense['category']}|{expense['amount']}\n")
+    print("Data saved successfully to 'expenses.txt'.")
+
+def load_data():
+    """Function to load data from a file"""
+    try:
+        with open("EXPENSES1.txt", "r") as file:
+            for line in file:
+                date, category, amount = line.strip().split("|")
+                expenses.append({"date": date, "category": category, "amount": float(amount)})
+        print("Data loaded successfully.")
+    except FileNotFoundError:
+        print("No saved data found. Starting fresh.")
+
+def view_insights():
+    """Function to view insights and display visualizations"""
+    if not expenses:
+        print("No expenses recorded yet.")
+        return
+
+    # Calculate total spending by category
+    category_totals = {}
+    for expense in expenses:
+        category_totals[expense["category"]] = category_totals.get(expense["category"], 0) + expense["amount"]
+
+    most_spent_category = max(category_totals, key=category_totals.get)
+    total_spent = sum(exp["amount"] for exp in expenses)
+    daily_average = total_spent / len(set(exp["date"] for exp in expenses))
+
+    print("\nInsights:")
+    print(f"Most spent category: {most_spent_category} (${category_totals[most_spent_category]:.2f})")
+    print(f"Total spending: ${total_spent:.2f}")
+    print(f"Daily average spending: ${daily_average:.2f}")
+
+    # Generate visualizations
+    # 1. Spending by Category (Pie Chart)
+    categories = list(category_totals.keys())
+    amounts = list(category_totals.values())
+    
+    plt.figure(figsize=(8, 6))
+    plt.pie(amounts, labels=categories, autopct='%1.1f%%', startangle=90)
+    plt.title("Spending by Category")
+    plt.axis('equal')  # Equal aspect ratio ensures pie chart is circular.
+    plt.show()
+
+    # 2. Spending Over Time (Bar Chart)
+    date_totals = {}
+    for expense in expenses:
+        date_totals[expense["date"]] = date_totals.get(expense["date"], 0) + expense["amount"]
+    
+    dates = list(date_totals.keys())
+    totals = list(date_totals.values())
+
+    plt.figure(figsize=(10, 6))
+    plt.bar(dates, totals, color='skyblue')
+    plt.xlabel("Date")
+    plt.ylabel("Total Spending ($)")
+    plt.title("Spending Over Time")
+    plt.xticks(rotation=45)
+    plt.tight_layout()  # To ensure everything fits nicely
+    plt.show()
+
+def main_menu():
+    """Main function to display the menu and handle user input"""
+    load_data()  # Load existing data on startup
+    while True:
+        print("\n--- Expense Tracker Menu ---")
+        print("1. Add Expense")
+        print("2. View Summary")
+        print("3. View Insights and Visualizations")
+        print("4. Save and Exit")
+        choice = input("Enter your choice (1-4): ")
+
+        if choice == "1":
+            add_expense()
+        elif choice == "2":
+            view_summary()
+        elif choice == "3":
+            view_insights()
+        elif choice == "4":
+            save_data()
+            print("Goodbye!")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+# Run the main menu
+main_menu()
+
