@@ -1,15 +1,9 @@
-This Python code:
-
-Creates a DataFrame with product details (ID, name, stock, weekly sales, restock threshold).
-Calculates predicted stock for the next 4 weeks based on weekly sales.
-Assigns restock status: Labels products needing restock if predicted stock falls below the threshold.
-Visualizes the data: Displays a horizontal bar chart comparing current stock to restock thresholds, highlighting products needing restocking.
-Displays a table of products with their current stock, predicted stock, and restock status.
-The result is a visualization and analysis of inventory needs, helping with decision-making for restocking.
+#project name:Inventory Management and Restocking Forecast for Products
+# Importing necessary libraries
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Data
+# Data: Product details such as ID, name, stock, weekly sales, and restock threshold
 data = {
     "product_id": [
         101, 102, 103, 104, 105, 106, 107, 108, 109, 110,
@@ -53,59 +47,64 @@ data = {
     ]
 }
 
-# Create DataFrame
+# This line creates a DataFrame from the above data dictionary.
 df = pd.DataFrame(data)
 
-# Calculate predicted stock after 4 weeks
+# Calculates predicted stock for the next 4 weeks.
+# This subtracts the total sales (sales per week * 4) from the current stock to estimate future stock.
 df['predicted_stock_4wks'] = df['current_stock'] - (df['sales_per_week'] * 4)
 
-# Check restock status
+# Assigns restock status based on whether the predicted stock falls below the restock threshold.
+# If predicted stock <= threshold, it needs restocking.
 df['restock_status'] = df.apply(
     lambda x: "Restock Needed" if x['predicted_stock_4wks'] <= x['restock_threshold'] else "Stock Sufficient",
     axis=1
 )
 
-# Identify products needing restock
+# This step marks products that need restocking by comparing current stock to the threshold.
 df['needs_restock'] = df['current_stock'] < df['restock_threshold']
 
-# Plot: Current Stock vs. Restock Threshold
-fig, ax = plt.subplots(figsize=(18, 24))  # Increase figure size for 150 data points
+# This block visualizes the data with a horizontal bar chart.
+# A bar chart is created comparing the current stock to the restock threshold.
 
-# Horizontal bar chart for current stock
+fig, ax = plt.subplots(figsize=(18, 24))  # Adjusted figure size for better visibility of all products
+
+# Bar chart displaying current stock
 bars = ax.barh(df['product_name'], df['current_stock'], color='skyblue', label='Current Stock')
 
-# Line for restock threshold
+# Scatter plot for restock thresholds
 ax.scatter(df['current_stock'], df['product_name'], color='red', label='Restock Threshold', marker='o')
 
-# Highlight products that need restocking
+# Highlighting products that need restocking by changing the bar color to orange
 for i, bar in enumerate(bars):
     if df.iloc[i]['current_stock'] < df.iloc[i]['restock_threshold']:
         bar.set_color('orange')
 
-# Add data labels for the bars
+# Adding labels to the bars for clarity
 for bar in bars:
     xval = bar.get_width()
     ax.text(xval + 2, bar.get_y() + bar.get_height() / 2, int(xval), va='center', fontsize=9)
 
-# Add title and labels
+# Adding title and axis labels
 ax.set_title('Inventory: Stock vs Restock Threshold', fontsize=18)
 ax.set_xlabel('Quantity', fontsize=14)
 ax.set_ylabel('Products', fontsize=14)
 
-# Rotate the product names on y-axis for better readability
+# Rotating the y-axis labels for better readability
 plt.yticks(rotation=0)
 
-# Add legend
+# Adding legend to the chart
 ax.legend()
 
-# Add grid for better readability
+# Adding grid for better readability of the chart
 ax.grid(axis='x', linestyle='--', alpha=0.7)
 
-# Tight layout for better spacing
+# Adjusting layout to prevent clipping of elements
 plt.tight_layout()
 
-# Show the graph
+# This line shows the graph with the visualized data.
 plt.show()
 
-# Display results
+# Finally, this will display the table of product details with their current stock, predicted stock, and restock status.
 print(df[['product_name', 'current_stock', 'predicted_stock_4wks', 'restock_status']])
+
