@@ -1,4 +1,4 @@
-# project
+# python project
 #ADVANCE EXPENSE TRACKER MANAGER
 # Expense Tracker Application with Visualizations
 # This notebook allows users to track their daily expenses, view summaries, gain insights, and save or load data. 
